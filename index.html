@@ -1,0 +1,31 @@
+<html>
+<head>
+
+</head>
+<body>
+    <div id="razmetka">
+        <video id='player' 
+               :src='p.src' 
+               :controls='p.controls'
+               width='640'
+               ></video>
+        <div>
+            <div>
+                Путь к файлу:
+                <input v-model='p.src' />
+            </div>
+            <button @click='captureTime'>Поставить метку</button>
+        </div>
+        <form id='fragments' 
+              v-for='metka in times' :key="metka.time">
+            <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.ts }}</a>
+            <input v-model='metka.text' 
+                   :id = '"inp"+metka.ts' 
+                   autofocus 
+                  >
+        </form>
+    </div>
+</body>
+    <script src='vue.global.js' ></script> 
+    <script src='main.js'></script>
+</html>
