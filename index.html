@@ -1,29 +1,44 @@
 <html>
 <head>
-
+    <meta charset="utf-8">
+    <style type="text/css">
+        #fragments{
+            
+            display:block;
+            height:65%;
+            width:100%;
+            overflow:auto;
+        }
+        body{
+            background: #111;
+            color: #eee;
+        }
+    </style>
 </head>
 <body>
     <div id="razmetka">
         <video id='player' 
-               :src='p.src' 
-               :controls='p.controls'
-               width='640'
+               :src='media.src' 
+               :controls='media.controls'
+               :height="media.height"
                ></video>
         <div>
             <div>
                 Путь к файлу:
-                <input v-model='p.src' />
+                <input v-model='media.src' />
             </div>
             <button @click='captureTime'>Поставить метку</button>
         </div>
-        <form id='fragments' 
-              v-for='metka in times' :key="metka.time">
-            <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.ts }}</a>
-            <input v-model='metka.text' 
-                   :id = '"inp"+metka.ts' 
-                   autofocus 
-                  >
-        </form>
+        <div id='fragments'>
+            <form class='row' v-for='metka in times' :key="metka.time">
+                <img :src='metka.img' alt="no image" />
+                <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.ts }}</a>
+                <input v-model='metka.text' 
+                       :id = '"inp"+metka.ts' 
+                       autofocus >
+            </form>
+        </div>
+            
     </div>
 </body>
     <script src='vue.global.js' ></script> 
