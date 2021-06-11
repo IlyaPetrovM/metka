@@ -1,12 +1,17 @@
+const HOST = 'http://t1553.ru:8055';
+
 /**
  * @brief Структура приложения на Vue. Чтобы всё работало необходимо скачать vue.global.js с их оф. сайта и подключить РАНЬШЕ этого скрипта
  */
+
 const Razmetka = {
 /**
  *  Данные, которые используются в проекте 
  */
   data() {
     return {
+        timecodes:[],
+        access_token:'',
         media: { 
             src:'video.mkv',
             controls:true,
@@ -15,6 +20,48 @@ const Razmetka = {
         times: [] //*< В этом списке хранятся все фрагменты со временем и описанием
     }
   },
+    mounted(){
+        var login = async function(user,psw){
+            
+            // Получение секретного токена по логину и паролю
+            let query = {
+                method: 'POST',
+                 headers: {
+                    'Content-Type': 'application/json'
+                  },
+                body: JSON.stringify({
+                    "email": user,
+                    "password": psw
+                })
+            };
+            var response = await fetch(HOST+'/auth/login', query);
+            if(response.ok){
+                let json = await response.json();
+                
+                this.access_token = json.data.access_token;
+            }else{
+                console.log('Ошибка HTTP: ', response.status);
+            }
+            
+            // Запрос данных из таблицы timecodes
+            let resp = await fetch(HOST+'/items/timecodes',{
+                headers:{
+                    'Authorization': 'Bearer '+ this.access_token, // токен добавляется в запрос, чтобы получить доступ
+                }
+            });
+            if(resp.ok){
+                let json = await resp.json();
+                this.timecodes = json.data;
+                console.log(this.timecodes);
+            }else{
+                console.log('Ошибка HTTP: ', resp.status);
+            }
+            
+        }
+        login(prompt("Логин"),
+              prompt("Введите пароль:"));
+        
+    },
 /**
  *  Обработчики событий 
  */
