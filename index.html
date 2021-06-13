@@ -9,6 +9,11 @@
             width:100%;
             overflow:auto;
         }
+        #fragments form img
+        {
+            display: inline-block;
+            width: 240px;
+        }
         body{
             background: #111;
             color: #eee;
@@ -17,8 +22,8 @@
 </head>
 <body>
     <div id="razmetka">
-        <video id='player' 
-               :src='media.src' 
+        <video crossorigin="anonymous" id='player' 
+               :src='HOST+"/assets/"+media.src+"?access_token="+access_token' 
                :controls='media.controls'
                :height="media.height"
                ></video>
@@ -30,11 +35,14 @@
             <button @click='captureTime'>Поставить метку</button>
         </div>
         <div id='fragments'>
-            <form class='row' v-for='metka in times' :key="metka.time">
-                <img :src='metka.img' alt="no image" />
-                <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.ts }}</a>
-                <input v-model='metka.text' 
-                       :id = '"inp"+metka.ts' 
+            <form class='row' v-for='metka in times' :key="metka.id">
+                <img 
+                     :src='metka.screenshot'
+                     alt="no image" />
+<!--                     :src='HOST+"/assets/"+metka.screenshot+"?access_token="+access_token'-->
+                <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.timestring }}</a>
+                <input v-model='metka.description' 
+                       :id = '"inp"+metka.timestring' 
                        autofocus >
             </form>
         </div>

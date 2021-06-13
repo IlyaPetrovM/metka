@@ -1,5 +1,3 @@
-const HOST = 'http://t1553.ru:8055';
-
 /**
  * @brief Структура приложения на Vue. Чтобы всё работало необходимо скачать vue.global.js с их оф. сайта и подключить РАНЬШЕ этого скрипта
  */
@@ -10,19 +8,20 @@ const Razmetka = {
  */
   data() {
     return {
-        timecodes:[],
+        HOST: 'http://t1553.ru:8055',
         access_token:'',
         media: { 
-            src:'video.mkv',
+            src:"ed995860-2cd0-4977-9eb7-6051eda1281b",
             controls:true,
             height:'360'
            },
         times: [] //*< В этом списке хранятся все фрагменты со временем и описанием
     }
   },
-    mounted(){
-        var login = async function(user,psw){
-            
+   mounted: async function(){
+       let HOST = this.HOST, 
+           user= "",
+           psw="";
             // Получение секретного токена по логину и паролю
             let query = {
                 method: 'POST',
@@ -51,15 +50,15 @@ const Razmetka = {
             });
             if(resp.ok){
                 let json = await resp.json();
-                this.timecodes = json.data;
-                console.log(this.timecodes);
+                for(i in json.data){
+                    this.times.push(json.data[i]);
+                }
+                console.log(this.times);
             }else{
                 console.log('Ошибка HTTP: ', resp.status);
             }
             
-        }
-        login(prompt("Логин"),
-              prompt("Введите пароль:"));
+        
         
     },
 /**
@@ -74,10 +73,10 @@ const Razmetka = {
             var timeSt = String(player.currentTime).toHHMMSS();
             
             this.times.push({
-                img: getScreenShot(player),
-                time: player.currentTime,
-                ts: timeSt,
-                text:' '
+                screenshot: getScreenShot(player),
+                seconds: player.currentTime,
+                timestring: timeSt,
+                description:''
             });
             
             setTimeout(function(){document.getElementById('inp'+timeSt).focus();}, 300); // ждём пока создастся input и переводим на него фокус
