@@ -22,4 +22,12 @@ npm i -D rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve @rollup/plug
 4. Появится папка `dist`. Файл `index.js` в ней нужно поместить в директорию `<папка directus>/extensions/modules/<название папки модуля>`
 5. Перезагрузите страницу с directus
 
+## Требования к базе данных
+В базе directus должна быть таблица с названием `timecodes` и полями:
+- id : int
+- description : String
+- second : int
+- screenshot : uuid
+- mediafile : String
 
+По-умолчанию все скриншоты помещаются в папку, с определённым id - это может вызывать проблемы при переносе проекта - решить их можно поменяв в файле `index.js` строчку `{folder:"33da7cc5-6d77-4522-9321-19e51bb5f854"}`. Вместо `33da7c....` вставьте id папки, в которую вы хотели бы складывать скриншоты. id папки можно узнать открыв её в directus - тогда в строке адреса после знака ? будет id. Например, `http://example.com/admin/files?folder=33da7cc5-6d77-4522-9321-19e51bb5f854`
