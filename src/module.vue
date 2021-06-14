@@ -1,15 +1,15 @@
     <style type="text/css">
-        #wrapper{
-            overflow-y:hidden !important; /*Чтобы не появлялась лишняя прокрутка всей страницы*/ 
-        }
         #controls{
             display:block;
             max-width: 360px;
+            height: 240px;
+        }
+        #controls video{
+            height: 200px;
         }
         #fragments{
-            
             display:block;
-            height:300px;
+            height: calc(90% - 240px);
             min-width:400px;
             overflow:auto;
         }
@@ -22,20 +22,14 @@
     </style>
 <template>
 	<private-view title="Разметка медиафала">
-        <div id=wrapper>
         <div id=contols>
         <video crossorigin = "anonymous" 
                id = 'player' 
                :src = '"/assets/"+media.src' 
                :controls = 'media.controls'
-               :height = "media.height"
+               height=200
        ></video>
         
-        
-            <div>
-                Путь к файлу:
-                <input v-model='media.src' />
-            </div>
             <v-button @click='captureTime'>Поставить метку</v-button>
         </div>
         <div id='fragments'>
@@ -45,16 +39,17 @@
                      alt="no image" v-if="metka.screenshot" />
                 <img class='tempImage'
                      :src='metka.tempImage'
-                     alt="no image" v-if="metka.tempImage" />
+                     alt="no image" v-if="(metka.screenshot==undefined)" />
 <!--                     :src='metka.screenshot'-->
                 <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.timestring }}</a>
                 <input v-model='metka.description' 
                        :id = '"inp"+metka.timestring' 
+                       @blur="sendDescription(metka, $event)"
+                       v-if='metka.id'
                        autofocus >
                 <button @click="deleteTimecode(metka)">X</button>
             </form>
         </div>
-    </div>
 
     </private-view>
 </template>
@@ -71,7 +66,7 @@ export default {
             src: getQuery.mediafile,
             focusOnSecond: getQuery.second,
             controls:true,
-            height:'240'
+            height:'200'
            },
             times: null,
         }
@@ -105,6 +100,7 @@ export default {
                 description:''
             };
             this.times.push(newTimecode);
+            var tm = this.times[this.times.length-1]; // Осторожно!! Если пересортировать список перед этим, то всё собъётся!
             /*
             *
             * Загрузка скриншота
@@ -120,21 +116,20 @@ export default {
             this.system.api.post('/files',formData,conf)
                 .then((res)=>{
                     console.log('file Uploaded. Result:',res);
+                    let uuid = res.data.data.id;
+                    this.system.api.patch('/files/'+uuid,{"folder": '33da7cc5-6d77-4522-9321-19e51bb5f854'});
                     // Отправка остальных данных
-                    newTimecode.screenshot = res.data.data.id;
+                    newTimecode.screenshot = uuid;
                     console.log(newTimecode);
                     this.system.api.post(TAB, newTimecode)
                         .then(function(res){
-                            console.log(res);
-                        }).then(this.loadItems())
-                        .then(()=>{
-                            setTimeout(function(){document.getElementById('inp'+timeSt).focus();}, 300); // ждём пока создастся input и переводим на него фокус
+                            let id = res.data.data.id;
+                            tm.id = id; // Осторожно!! Если пересортировать список перед этим, то всё собъётся!
+                            console.log('new Timecode uploaded');
+                        }).then(()=>{
+                            setTimeout(function(){document.getElementById('inp'+timeSt).focus();}, 100); // ждём пока создастся input и переводим на него фокус
                         });
                 });
-
-            
-            
-            
         },  
          /**
          * @brief Сфокусировать курсор на текстовом поле, 
@@ -146,6 +141,19 @@ export default {
             document.getElementById( 'inp'+metka.timestring).focus();
             player.currentTime = parseInt(metka.second);
         },
+        /**
+         * @brief Отправить описание фрагмента на сервер
+         * @return ничего
+         */
+        sendDescription(metka, event){
+            console.log('Send Description', event);
+            this.system.api.patch(TAB+'/'+metka.id, {description: metka.description})
+                .then((res)=>{console.log('Desc. sent');});
+        },
+        /**
+         * @brief Удалить фрагмент
+         * @return ничего
+         */
         deleteTimecode(metka){
             this.system.api.delete(TAB+'/'+metka.id)
             .then((res)=>{ colsole.log(res)});
