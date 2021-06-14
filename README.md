@@ -10,7 +10,7 @@ https://docs.directus.io/guides/modules/
 ```
 npm i -D rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve @rollup/plugin-replace rollup-plugin-terser rollup-plugin-vue @vue/compiler-sfc
 ```
-3. В консоли введите команду `npx rollup -c`
+3.  В консоли перейдите в директорию с файлами проекта и введите команду `npx rollup -c`
 4. Появится папка `dist`. Файл `index.js` в ней нужно поместить в директорию `<папка directus>/extensions/modules/<название папки модуля>`
 5. Перезагрузите страницу с directus
 
