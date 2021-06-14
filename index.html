@@ -23,7 +23,7 @@
 <body>
     <div id="razmetka">
         <video crossorigin="anonymous" id='player' 
-               :src='HOST+"/assets/"+media.src+"?access_token="+access_token' 
+               :src='HOST+"/assets/"+media.src' 
                :controls='media.controls'
                :height="media.height"
                ></video>
@@ -37,9 +37,9 @@
         <div id='fragments'>
             <form class='row' v-for='metka in times' :key="metka.id">
                 <img 
-                     :src='metka.screenshot'
+                     :src='HOST+"/assets/"+metka.screenshot+"?access_token="+access_token'
                      alt="no image" />
-<!--                     :src='HOST+"/assets/"+metka.screenshot+"?access_token="+access_token'-->
+<!--                     :src='metka.screenshot'-->
                 <a   @click = 'inputFocused(metka, $event)' href='#'> {{ metka.timestring }}</a>
                 <input v-model='metka.description' 
                        :id = '"inp"+metka.timestring' 
@@ -50,5 +50,5 @@
     </div>
 </body>
     <script src='vue.global.js' ></script> 
-    <script src='main.js'></script>
+    <script src='main.js' type="module"></script>
 </html>

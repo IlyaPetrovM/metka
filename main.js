@@ -1,6 +1,20 @@
+import { config } from './secret.js';
 /**
  * @brief Структура приложения на Vue. Чтобы всё работало необходимо скачать vue.global.js с их оф. сайта и подключить РАНЬШЕ этого скрипта
  */
+
+function getUrlParams(search) {
+    let hashes = search.slice(search.indexOf('?') + 1).split('&')
+    let params = {}
+    hashes.map(hash => {
+        let [key, val] = hash.split('=')
+        params[key] = decodeURIComponent(val)
+    })
+    return params;
+}
+let getQuery = getUrlParams(document.URL);
+console.log(getQuery);
+console.log("cookie:", document.cookie);
 
 const Razmetka = {
 /**
@@ -8,10 +22,11 @@ const Razmetka = {
  */
   data() {
     return {
-        HOST: 'http://t1553.ru:8055',
+        HOST: config.HOST,
         access_token:'',
         media: { 
-            src:"ed995860-2cd0-4977-9eb7-6051eda1281b",
+            src: getQuery.mediafile,
+            focusOnSecond: getQuery.second,
             controls:true,
             height:'360'
            },
@@ -20,20 +35,20 @@ const Razmetka = {
   },
    mounted: async function(){
        let HOST = this.HOST, 
-           user= "",
-           psw="";
+           user= config.USER ? config.USER : prompt("Логин"),
+           psw= config.PSW ? config.PSW : prompt("Пароль");
             // Получение секретного токена по логину и паролю
             let query = {
                 method: 'POST',
                  headers: {
                     'Content-Type': 'application/json'
-                  },
-                body: JSON.stringify({
-                    "email": user,
-                    "password": psw
-                })
+                  }
+//                body: JSON.stringify({
+//                    "email": user,
+//                    "password": psw
+//                })
             };
-            var response = await fetch(HOST+'/auth/login', query);
+            var response = await fetch(HOST+'/auth/refresh', query);
             if(response.ok){
                 let json = await response.json();
                 
@@ -43,23 +58,24 @@ const Razmetka = {
             }
             
             // Запрос данных из таблицы timecodes
-            let resp = await fetch(HOST+'/items/timecodes',{
-                headers:{
-                    'Authorization': 'Bearer '+ this.access_token, // токен добавляется в запрос, чтобы получить доступ
-                }
-            });
+            let q = `${HOST}/items/timecodes?filter={"mediafile":{"_eq":"${this.media.src}" }}`;
+            let resp = await fetch(q,
+//            {
+//                headers:{
+//                    'Authorization': 'Bearer '+ this.access_token, // токен добавляется в запрос, чтобы получить доступ
+//                }
+//            }
+            );
+       
             if(resp.ok){
                 let json = await resp.json();
-                for(i in json.data){
+                for(let i in json.data){
                     this.times.push(json.data[i]);
                 }
                 console.log(this.times);
             }else{
                 console.log('Ошибка HTTP: ', resp.status);
             }
-            
-        
-        
     },
 /**
  *  Обработчики событий 
@@ -74,7 +90,7 @@ const Razmetka = {
             
             this.times.push({
                 screenshot: getScreenShot(player),
-                seconds: player.currentTime,
+                second: player.currentTime,
                 timestring: timeSt,
                 description:''
             });
@@ -89,8 +105,8 @@ const Razmetka = {
          * @return ничего
          */
         inputFocused(metka,e){
-            document.getElementById( 'inp'+metka.ts).focus();
-            player.currentTime = metka.time;
+            document.getElementById( 'inp'+metka.timestring).focus();
+            player.currentTime = parseInt(metka.second);
         }
     }
 }
